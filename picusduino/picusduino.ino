@@ -72,7 +72,7 @@ void start(){
 void send(char cmd, int tx){
   char _send[100];
   sprintf(_send, "&%c%d&%c", cmd, tx, cmd);
-  Serial.println(_send);
+  Serial.write(_send);
 }
 
 void setup() {
@@ -94,7 +94,7 @@ void setup() {
         if (DEBUG) Serial.println("received");
         char _send[100];
         sprintf(_send, "&^%s&^", board);
-        Serial.println(_send); // send verification / board type
+        Serial.write(_send); // send verification / board type
         break; // break out of while loop
       }
     }
@@ -111,7 +111,7 @@ void loop() {
       char input = Serial.read();
       switch(int(input)){
         case ')': // analog read
-          p = Serial.parseInt();
+          p = int(Serial.read());
           send(input,analogRead(p));
           if (DEBUG){
             Serial.print("analog read ");
@@ -119,7 +119,7 @@ void loop() {
           }
         break;
         case '(': // digital read
-          p = Serial.parseInt();
+          p = int(Serial.read());
           send(input,digitalRead(p));
           if (DEBUG){
             Serial.print("digital read ");
@@ -127,8 +127,9 @@ void loop() {
           }
         break;
         case '@': // analog write
-          p = Serial.parseInt();
-          v = Serial.parseInt();
+          p = int(Serial.read());
+          Serial.read();
+          v = int(Serial.read());
           analogWrite(p,v);
           if (DEBUG){
             Serial.print("analog write ");
@@ -137,8 +138,9 @@ void loop() {
           }
         break;
         case '#': // digital write
-          p = Serial.parseInt();
-          v = Serial.parseInt();
+          p = int(Serial.read());
+          Serial.read();
+          v = int(Serial.read());
           analogWrite(p,v!=0);
           if (DEBUG){
             Serial.print("digital write ");
@@ -147,8 +149,9 @@ void loop() {
           }
         break;
         case '$': // pwm
-          p = Serial.parseInt();
-          v = Serial.parseInt();
+          p = int(Serial.read());
+          Serial.read();
+          v = int(Serial.read());
           if (DEBUG){
             Serial.print("pwm write ");
             Serial.println(p);
@@ -158,12 +161,13 @@ void loop() {
         case '^': // verify
           char tx[100];
           sprintf(tx, "&^%s&^", board);
-          Serial.println(tx); // send verification / board type
+          Serial.write(tx); // send verification / board type
           if (DEBUG) Serial.println("verify");
         break;
         case '%': // pin mode
-          p = Serial.parseInt();
-          v = Serial.parseInt();
+          p = int(Serial.read());
+          Serial.read();
+          v = int(Serial.read());
           pinMode(p,v!=0);
           if (DEBUG){
             Serial.print("pin mode ");
