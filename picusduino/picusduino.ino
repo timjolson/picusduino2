@@ -13,9 +13,11 @@ int pins[160];
 int numPins;
 const char* buf;
 
+char* board = arduino.BOARD_NAME;
+
 void start(){
   // use board type to get GPIO info
-  if (!strcmp(arduino.BOARD_NAME,"UNO")){
+  if (!strcmp(board,"UNO")){
     numDigitals = 14; // digitals 0->13 := 0->13
     numAnalogs = 6; // analogs 14->19 := A0->A5
     for (int i = 0; i<numDigitals; i++){
@@ -39,7 +41,7 @@ void start(){
       digitalWrite(pins[i], LOW);
     }
   }
-  else if (!strcmp(arduino.BOARD_NAME,"MEGA")){
+  else if (!strcmp(board,"MEGA")){
     numDigitals = 54; // digitals 0->53 := 0->53
     numAnalogs = 16; // analogs 97->82 := A0->A15
     for (int i = 0; i<numDigitals; i++){
@@ -91,7 +93,7 @@ void setup() {
         Serial.read();  //junk the character
         if (DEBUG) Serial.println("received");
         char _send[100];
-        sprintf(_send, "&^%s&^", arduino.BOARD_NAME);
+        sprintf(_send, "&^%s&^", board);
         Serial.println(_send); // send verification / board type
         break; // break out of while loop
       }
@@ -155,7 +157,7 @@ void loop() {
         break;
         case '^': // verify
           char tx[100];
-          sprintf(tx, "&^%s&^", arduino.BOARD_NAME);
+          sprintf(tx, "&^%s&^", board);
           Serial.println(tx); // send verification / board type
           if (DEBUG) Serial.println("verify");
         break;
