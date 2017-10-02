@@ -77,7 +77,7 @@ void send(char cmd, int tx){
 
 void setup() {
   // Serial connection
-  Serial.begin(115200);
+  Serial.begin(1000000);
   Serial.setTimeout(5);
 
   start();
