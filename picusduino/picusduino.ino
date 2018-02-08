@@ -2,17 +2,16 @@
 
 ArduinoBoardManager arduino = ArduinoBoardManager();
 
+// Print things to Serial Monitor
 const bool DEBUG = false;
 
-bool isInited = false;
-int digitals[80];
-int numDigitals;
-int analogs[80];
-int numAnalogs;
-int pins[160];
-int numPins;
-const char* buf;
+int digitals[80]; // store digital pin numbers
+int numDigitals;  // quantity of digital pins
+int analogs[80];  // store analog pin numbers
+int numAnalogs;   // quantity of analog pins
+const char* buf;  // buffer for reading serial
 
+// Get board name, used to set available pin numbers
 char* board = arduino.BOARD_NAME;
 
 void start(){
@@ -22,23 +21,21 @@ void start(){
     numAnalogs = 6; // analogs 14->19 := A0->A5
     for (int i = 0; i<numDigitals; i++){
       digitals[i] = i;
-      pins[i] = i;
       if (DEBUG){
         Serial.print("Digital ");
         Serial.println(digitals[i]);
       }
-      pinMode(pins[i], INPUT);
-      digitalWrite(pins[i], LOW);
+      pinMode(digitals[i], INPUT);
+      digitalWrite(digitals[i], LOW);
     }
     for (int i = 0; i<numAnalogs; i++){
       analogs[i] = i+14;
-      pins[i] = analogs[i];
       if (DEBUG){
         Serial.print("Analog ");
         Serial.println(analogs[i]);
       }
-      pinMode(pins[i], INPUT);
-      digitalWrite(pins[i], LOW);
+      pinMode(analogs[i], INPUT);
+      digitalWrite(analogs[i], LOW);
     }
   }
   else if (!strcmp(board,"MEGA")){
@@ -46,29 +43,27 @@ void start(){
     numAnalogs = 16; // analogs 97->82 := A0->A15
     for (int i = 0; i<numDigitals; i++){
       digitals[i] = i;
-      pins[i] = i;
       if (DEBUG){
         Serial.print("Digital ");
         Serial.println(digitals[i]);
       }
-      pinMode(pins[i], INPUT);
-      digitalWrite(pins[i], LOW);
+      pinMode(digitals[i], INPUT);
+      digitalWrite(digitals[i], LOW);
     }
     for (int i = numAnalogs; i>=82; i--){
       analogs[i] = i+82;
-      pins[i] = analogs[i];
       if (DEBUG){
         Serial.print("Analog ");
         Serial.println(analogs[i]);
       }
-      pinMode(pins[i], INPUT);
-      digitalWrite(pins[i], LOW);
+      pinMode(analogs[i], INPUT);
+      digitalWrite(analogs[i], LOW);
     }
   }
 
-  numPins = numDigitals + numAnalogs;
 }
 
+// Send a value 'tx' for command type 'cmd'
 void send(char cmd, int tx){
   char _send[100];
   sprintf(_send, "&%c%d&%c", cmd, tx, cmd);
@@ -80,6 +75,7 @@ void setup() {
   Serial.begin(1000000);
   Serial.setTimeout(5);
 
+  // Setup pins initially
   start();
   
   // 10-bit analog reads
@@ -88,12 +84,13 @@ void setup() {
 
   // wait for board verification request
   while (1){
-    if (Serial.available()>1 && Serial.read()=='&'){
-      if (Serial.peek()=='^'){ // get second header character
-        Serial.read();  //junk the character
-        if (DEBUG) Serial.println("received");
+    if (Serial.available()>1 && Serial.read()=='&'){ // get 1st header character
+      if (Serial.peek()=='^'){ // get 2nd header character
+        Serial.read();  //junk the 2nd header character
+        if (DEBUG)
+            Serial.println("received");
         char _send[100];
-        sprintf(_send, "&^%s&^", board);
+        sprintf(_send, "&^%s&^", board);  // build response
         Serial.write(_send); // send verification / board type
         break; // break out of while loop
       }
@@ -104,11 +101,19 @@ void setup() {
 
 
 void loop() {
+  // While there's serial data available
   while (Serial.available()>1){
-    if (Serial.read()=='&'){
-      if (DEBUG) Serial.println("&");
+    if (Serial.read()=='&'){  // 1st header character
+      if (DEBUG) 
+          Serial.println("&");
+      
+      // pin and value
       int p, v;
+      
+      // read next character
       char input = Serial.read();
+      
+      // use character to select a function
       switch(int(input)){
         case ')': // analog read
           p = int(Serial.read());
