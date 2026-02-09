@@ -19,3 +19,7 @@ Sketch for communicating with Arduino Mega or Uno (expandable to other types).
 Old script for communicating with Arduino Mega.
   
   Currently used in `picuspy/rover.py`
+
+## License
+
+See [LICENSE](LICENSE) for details.
